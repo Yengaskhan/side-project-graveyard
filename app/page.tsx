@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Counter } from "./components/Counter";
 
 // -------------------------------------------------------------------
 // Types
@@ -86,11 +87,17 @@ function TombstoneCard({
     }
   }, [tombstone]);
 
+  const handleTweet = useCallback(() => {
+    const tweet = `RIP ${tombstone.name} \u{1FAA6}\n"${tombstone.description}"\nLived ${tombstone.duration}. Cause of death: ${tombstone.causeOfDeath}.${tombstone.lastWords ? `\n\n"${tombstone.lastWords}"` : ""}\n\nBury yours:`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}&url=${encodeURIComponent("https://vibe-board-sand.vercel.app")}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, [tombstone]);
+
   return (
     <div className="tombstone-card bg-card-bg border border-card-border p-6 flex flex-col gap-3 transition-all duration-300">
       {/* Cross / RIP decoration */}
       <div className="text-center text-muted text-xs tracking-[0.3em] uppercase mb-1 select-none">
-        \u271D R.I.P. \u271D
+        {"\u271D"} R.I.P. {"\u271D"}
       </div>
 
       {/* Project name */}
@@ -133,20 +140,32 @@ function TombstoneCard({
           </span>
         </button>
 
-        <button
-          onClick={handleShare}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-card-border/50 transition-colors cursor-pointer"
-        >
-          {copied ? (
-            <>
-              <CheckIcon /> Copied
-            </>
-          ) : (
-            <>
-              <ShareIcon /> Share
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleTweet}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-card-border/50 transition-colors cursor-pointer"
+            title="Post to X"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            Post
+          </button>
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-card-border/50 transition-colors cursor-pointer"
+          >
+            {copied ? (
+              <>
+                <CheckIcon /> Copied
+              </>
+            ) : (
+              <>
+                <ShareIcon /> Copy
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -324,6 +343,7 @@ export default function Home() {
     setTombstones(updated);
     saveTombstones(updated);
     setShowForm(false);
+    fetch('https://api.counterapi.dev/v1/vibeboard-tools/side-project-graveyard/up').catch(() => {})
   };
 
   const handleResurrect = (id: string) => {
@@ -352,6 +372,14 @@ export default function Home() {
         <p className="mt-3 text-lg text-muted">
           Where side projects go to rest
         </p>
+        <div className="mt-4 flex justify-center">
+          <Counter
+            namespace="vibeboard-tools"
+            counterKey="side-project-graveyard"
+            label="projects buried"
+            incrementOnMount={false}
+          />
+        </div>
       </div>
 
       {/* Tabs + Add Button */}
